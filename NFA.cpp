@@ -30,19 +30,28 @@ bool NFA::inputString(std::string input) {
 }
 
 void NFA::printNFA(std::string filename) {
-    std::fstream outputFile(filename);
+    std::ofstream outputFile(filename);
     std::stringstream s;
-    s << "{\n";
+    // states
+    for (auto state:endStates) {
+        s << "  " << state->name << "[peripheries=2]" << std::endl;
+    }
+    // edges
     for (auto state:states) {
         for (auto symbol:state->transition) {
             for (auto edge:symbol.second)
-            s << state->name << "--" << edge->name;
+            s << "  " << state->name << "->" << edge->name << "[label=\"" << symbol.first << "\"];" << std::endl;
         }
     }
-    outputFile << s.str();
-    outputFile << "a";
+
+    // start state
+    s << "  " << "head [style=invis]\n   head->" << startState[0]->name << std::endl;
+    // end states
+
+    outputFile << "digraph {\n" << s.str() << "}";
     outputFile.close();
 }
+
 NFA::NFA(std::string filename) {
     std::ifstream configDoc(filename, std::ifstream::binary);
     Json::Value root;
