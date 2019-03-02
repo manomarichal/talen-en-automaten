@@ -4,16 +4,10 @@
 #include "NFA.h"
 #include "json.h"
 
-NFA parse(std::string filename) {
-    std::ifstream configDoc(filename, std::ifstream::binary);
-    Json::Value root;
-    configDoc >> root;
-
-    std::string type = root.get("type", "DFA").asString();
-
-}
 
 
 int main() {
-
+    NFA k("../test1.json");
+    std::cout << k.inputString("100001000010");
+    k.printNFA("../nfa.dot");
 }
