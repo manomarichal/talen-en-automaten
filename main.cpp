@@ -7,8 +7,10 @@
 
 
 int main() {
-    DFA k("../input/test1.json");
-    std::cout << k.inputString("100001000010");
-    k.printNFA("nfa.dot");
-    system("dot -Tpng ../output/nfa.dot -o ../output/nfa.png");
+    DFA k("../input/tfa-min/input.dfa.json");
+    k.printDFA("../output/dfa_not_minimized.dot");
+    k.minimizeDfa();
+    k.printDFA("../output/dfa_minimized.dot");
+    system("dot -Tpng ../output/dfa_minimized.dot -o ../output/dfa_minimized.png");
+    system("dot -Tpng ../output/dfa_not_minimized.dot -o ../output/dfa_not_minimized.png");
 }

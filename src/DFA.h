@@ -20,6 +20,7 @@ private:
     struct State {
         std::map<char, State*> transition;
         std::string name;
+        bool final = false;
 
         State(std::string stateName) {name = stateName;};
         bool operator==(const State &s) {
@@ -34,6 +35,7 @@ private:
     State* currentState;
     std::vector<State*> endStates;
     void transition(char c);
+    bool checkInEqClass(const std::vector<std::vector<State*>> &eqClasses, State* stateToCheck);
     bool properlyInitialized;
 
 public:
@@ -41,7 +43,9 @@ public:
 
     bool inputString(std::string s);
 
-    void printNFA(std::string filename);
+    void printDFA(std::string filename);
+
+    void minimizeDfa();
 };
 
 
