@@ -30,7 +30,7 @@ bool NFA::inputString(std::string input) {
 }
 
 void NFA::printNFA(std::string filename) {
-    std::ofstream outputFile(filename);
+    std::ofstream outputFile("../output/" + filename);
     std::stringstream s;
     // states
     for (auto state:endStates) {
