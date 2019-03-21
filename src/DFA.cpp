@@ -2,19 +2,14 @@
 // Created by manom on 2/03/2019.
 //
 
-#include "NFA.h"
+#include "./DFA.h"
 
-void NFA::transition(char c) {
-    std::vector<State*> next;
-    for (auto s: currentState) {
-        for (auto n: s->transition[c]) {
-            next.push_back(n);
-        }
-    }
-    currentState = next;
+void DFA::transition(char c) {
+    currentState = currentState->transition[c];
 }
 
-bool NFA::inputString(std::string input) {
+bool DFA::inputString(std::string input) {
+    if (!properlyInitialized) return false;
     currentState = {startState};
     for (char c: input) {
         if (std::find(alphabet.begin(), alphabet.end(), c) == alphabet.end()) {
@@ -23,13 +18,12 @@ bool NFA::inputString(std::string input) {
         }
         transition(c);
     }
-    for (auto state: currentState) {
-        if (std::find(endStates.begin(), endStates.end(), state) != endStates.end()) return true;
-    }
+    if (std::find(endStates.begin(), endStates.end(), currentState) != endStates.end()) return true;
     return false;
 }
 
-void NFA::printNFA(std::string filename) {
+void DFA::printNFA(std::string filename) {
+    if (!properlyInitialized) return;
     std::ofstream outputFile("../output/" + filename);
     std::stringstream s;
     // states
@@ -39,25 +33,28 @@ void NFA::printNFA(std::string filename) {
     // edges
     for (auto state:states) {
         for (auto symbol:state->transition) {
-            for (auto edge:symbol.second)
-            s << "  " << state->name << "->" << edge->name << "[label=\"" << symbol.first << "\"];" << std::endl;
+            s << "  " << state->name << "->" << symbol.second->name<< "[label=\"" << symbol.first << "\"];" << std::endl;
         }
     }
 
     // start state
-    s << "  " << "head [style=invis]\n   head->" << startState[0]->name << std::endl;
+    s << "  " << "head [style=invis]\n   head->" << startState->name << std::endl;
     // end states
 
     outputFile << "digraph {\n" << s.str() << "}";
     outputFile.close();
 }
 
-NFA::NFA(std::string filename) {
+DFA::DFA(std::string filename) {
     std::ifstream configDoc(filename, std::ifstream::binary);
     Json::Value root;
     Json::Reader reader;
     reader.parse(configDoc, root, false);
     std::string type = root["type"].asString();
+    if (type != "DFA") {
+        std::cerr <<  "failed to construct dfa: type is not DFA" << std::endl;
+        return;
+    }
 
     // read alphabet in
     const Json::Value &alphabetJson = root["alphabet"];
@@ -83,7 +80,7 @@ NFA::NFA(std::string filename) {
         State* temp = new State(statesJson[index]["name"].asString());
         if (statesJson[index]["starting"].asBool()) {
             if (startStateCheck) std::cerr << "there can only be one starting state" << std::endl;
-            startState.push_back(temp);
+            startState = temp;
             startStateCheck = true;
         }
         if (statesJson[index]["accepting"].asBool()) {
@@ -91,12 +88,8 @@ NFA::NFA(std::string filename) {
         }
         states.push_back(temp);
     }
-    // read in transitions
-    for (auto state: states) {
-        for (char c:alphabet) {
-            state->transition[c] = {};
-        }
-    }
+
+
     const Json::Value &transitionsJson = root["transitions"];
     for (int index = 0; index < transitionsJson.size(); ++index) {
         for (auto state: states) {
@@ -113,11 +106,12 @@ NFA::NFA(std::string filename) {
                 }
                 for (auto s: states) {
                     if (s->name == transitionsJson[index]["to"].asString()) {
-                        state->transition[transitionsJson[index]["input"].asString()[0]].emplace_back(s);
+                        state->transition[transitionsJson[index]["input"].asString()[0]] = s;
                     }
                 }
 
             }
         }
     }
+    properlyInitialized = true;
 }

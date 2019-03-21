@@ -3,4 +3,4 @@ project(dfadot)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(dfadot main.cpp NFA.cpp NFA.h jsoncpp.cpp)
+add_executable(dfadot main.cpp ./src/NFA.cpp ./src/NFA.h ./src/jsoncpp.cpp ./src/DFA.cpp ./src/DFA.h)
