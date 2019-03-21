@@ -14,17 +14,6 @@
 #include <typeinfo>
 #include "./json.h"
 
-struct State {
-    std::map<char, State*> transition;
-    std::string name;
-
-    State(std::string stateName) {name = stateName;};
-    bool operator==(const State &s) {
-        if (name == s.name) return true;
-        return false;
-    }
-};
-
 class DFA {
 private:
 

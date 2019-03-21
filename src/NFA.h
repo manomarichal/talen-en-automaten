@@ -42,6 +42,8 @@ public:
     bool inputString(std::string s);
 
     void printNFA(std::string filename);
+
+    void convertToDfa(std::string filename);
 };
 
 

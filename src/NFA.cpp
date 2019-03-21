@@ -54,6 +54,18 @@ void NFA::printNFA(std::string filename) {
     outputFile.close();
 }
 
+void NFA::convertToDfa(std::string filename) {
+    if (!properlyInitialized) return;
+    std::ofstream outputFile("../output/" + filename);
+    std::stringstream s;
+
+    // start state
+    s << "  " << "head [style=invis]\n   head->" << startState[0]->name << std::endl;
+    // subset constructie + lazy evaluation
+
+    outputFile << "digraph {\n" << s.str() << "}";
+    outputFile.close();
+}
 NFA::NFA(std::string filename) {
     std::ifstream configDoc(filename, std::ifstream::binary);
     Json::Value root;
