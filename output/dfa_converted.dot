@@ -1,0 +1,14 @@
+digraph {
+  {12}[peripheries=2]
+  {312}[peripheries=2]
+  {0}->{12}[label="a"];
+  {0}->dead[label="v"];
+  {12}->{}[label="a"];
+  {12}->{312}[label="v"];
+  dead->dead[label="a"];
+  dead->dead[label="v"];
+  {}->dead[label="a"];
+  {312}->dead[label="a"];
+  head [style=invis]
+   head->{0}
+}

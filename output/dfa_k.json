@@ -1,0 +1,44 @@
+{
+	"alphabet" : 
+	[
+		"c",
+		"g"
+	],
+	"states" : 
+	[
+		{
+			"accepting" : true,
+			"name" : "1",
+			"starting" : false
+		},
+		{
+			"accepting" : false,
+			"name" : "320",
+			"starting" : true
+		}
+	],
+	"transitions" : 
+	[
+		{
+			"from" : "1",
+			"input" : "c",
+			"to" : "320"
+		},
+		{
+			"from" : "1",
+			"input" : "g",
+			"to" : "320"
+		},
+		{
+			"from" : "320",
+			"input" : "c",
+			"to" : "320"
+		},
+		{
+			"from" : "320",
+			"input" : "g",
+			"to" : "1"
+		}
+	],
+	"type" : "dfa"
+}

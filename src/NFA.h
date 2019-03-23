@@ -13,21 +13,31 @@
 #include <iostream>
 #include <typeinfo>
 #include "./json.h"
-
+#include "DFA.h"
 
 class NFA {
-private:
+public:
 
     struct State {
         std::map<char, std::vector<State*>> transition;
         std::string name;
-
+        bool final=false;
         State(std::string stateName) {name = stateName;};
         bool operator==(const State &s) {
             if (name == s.name) return true;
             return false;
         }
     };
+
+    NFA(std::string filename);
+
+    bool inputString(std::string s);
+
+    void convertToDot(std::string filename);
+
+    DFA* convertToDfa(std::string filename);
+
+private:
 
     std::vector<char> alphabet;
     std::vector<State*> states;
@@ -36,14 +46,39 @@ private:
     std::vector<State*> currentState;
     void transition(char c);
     bool properlyInitialized = false;
-public:
-    NFA(std::string filename);
 
-    bool inputString(std::string s);
+    // helpers used by subsetconstruction
+    struct SubState {
+        DFA::State* dfastate;
+        std::vector<State*> consistsof;
 
-    void printNFA(std::string filename);
+        bool operator==(const SubState &right) {
+            if (this->consistsof.size() != right.consistsof.size()) return false;
+            for (auto &state:this->consistsof) {
+                bool isIn = false;
+                for (auto &rightState:right.consistsof) {
+                    if (state->name == rightState->name) isIn = true;
+                }
+                if (!isIn) return false;
+            }
+            return true;
+        }
 
-    void convertToDfa(std::string filename);
+        bool findState(State* state) {
+            bool check = false;
+            for (auto sstate:consistsof) {
+                if (state->name == sstate->name) check = true;
+            }
+            return check;
+        }
+    };
+
+    std::vector<SubState> subStates;
+
+    void sscHelper(DFA* d, SubState crState);
+
+
+
 };
 
 

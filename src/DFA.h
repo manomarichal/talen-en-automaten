@@ -15,7 +15,7 @@
 #include "./json.h"
 
 class DFA {
-private:
+public:
 
     struct State {
         std::map<char, State*> transition;
@@ -29,6 +29,46 @@ private:
         }
     };
 
+    DFA()= default;
+
+    DFA(std::string filename);
+
+    bool inputString(std::string s);
+
+    void convertToDot(std::string filename);
+
+    void minimizeDfa();
+
+    void convertToJson(std::string filename);
+
+    bool isEquivalentTo(const DFA &dfa, bool verbose);
+
+    const std::vector<State *> &getStates() const;
+
+    const std::vector<char> &getAlphabet() const;
+
+    void setAlphabet(const std::vector<char> &alphabet);
+
+    void setStates(const std::vector<State *> &states);
+
+    void setStartState(State *startState);
+
+    void setEndStates(const std::vector<State *> &endStates);
+
+    State *getStartState() const;
+
+    const std::vector<State *> &getEndStates() const;
+
+    bool isProperlyInitialized() const;
+
+    void setProperlyInitialized(bool properlyInitialized);
+
+    void addState(State* state);
+
+    void addEndState(State* state);
+
+
+private:
     std::vector<char> alphabet;
     std::vector<State*> states;
     State* startState;
@@ -38,14 +78,6 @@ private:
     bool checkInEqClass(const std::vector<std::vector<State*>> &eqClasses, State* stateToCheck);
     bool properlyInitialized;
 
-public:
-    DFA(std::string filename);
-
-    bool inputString(std::string s);
-
-    void printDFA(std::string filename);
-
-    void minimizeDfa();
 };
 
 

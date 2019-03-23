@@ -30,7 +30,7 @@ bool DFA::inputString(std::string input) {
     return false;
 }
 
-void DFA::printDFA(std::string filename) {
+void DFA::convertToDot(std::string filename) {
     if (!properlyInitialized) return;
     std::ofstream outputFile("../output/" + filename);
     std::stringstream s;
@@ -179,6 +179,127 @@ void DFA::minimizeDfa() {
 
 
 }
+
+void DFA::convertToJson(std::string filename) {
+    if (!properlyInitialized) return;
+    std::ofstream outputFile("../output/" + filename);
+    Json::Value output;
+
+    output["type"] = "dfa";
+
+    // alphabet
+    Json::Value tempAlphabet(Json::arrayValue);
+    for (char c:alphabet) {
+        tempAlphabet.append(Json::Value(std::string(1,c)));
+    }
+    output["alphabet"] = tempAlphabet;
+
+    // states
+    Json::Value tempStates(Json::arrayValue);
+    for (auto &state:states) {
+        Json::Value tempState;
+        tempState["name"] = state->name;
+        if (state == startState) tempState["starting"] = true;
+        else tempState["starting"] = false;
+        tempState["accepting"] = state->final;
+        tempStates.append(tempState);
+    }
+    output["states"] = tempStates;
+
+
+    // transitions
+    Json::Value tempTransitions(Json::arrayValue);
+    for (auto &state:states) {
+        for (auto &transition:state->transition) {
+            Json::Value tempTransition;
+            tempTransition["from"] = state->name;
+            tempTransition["to"] = transition.second->name;
+            tempTransition["input"] = std::string(1, transition.first);
+            tempTransitions.append(tempTransition);
+        }
+    }
+    output["transitions"] = tempTransitions;
+    outputFile << output;
+    outputFile.close();
+}
+
+bool DFA::isEquivalentTo(const DFA &dfa, bool verbose) {
+
+    std::vector<State*> unie;
+    for (State* state:states) unie.emplace_back(state);
+    for (State* state:dfa.getStates()) unie.emplace_back(state);
+
+    // deze map stelt de tabel voor met de paren, de bool geeft aan of het wel of niet onderscheidbaar is
+    std::map<std::pair<State*, State*>, bool> checkAccesible;
+    // add pairs to table
+    for (int x=0; x < unie.size(); x++) {
+        for (int y=x+1; y < unie.size(); y++) {
+            checkAccesible[{unie[x], unie[y]}] = false;
+        }
+    }
+    // base case, zet paren die uit 1 final state staan op onderscheidbaar
+    for (const auto &pair:checkAccesible) {
+        if ((pair.first.first->final and !pair.first.second->final) or
+            (!pair.first.first->final and pair.first.second->final)) {
+            checkAccesible[pair.first] = true;
+        }
+    }
+
+    // inductive step
+    while (true) {
+        int pos=0; // used to check if we looped over all pairs without being able to mark one, if so we can end the inductive step
+        for (const auto &pair:checkAccesible) {
+            if (pair.second)  {
+                pos++;
+                continue;
+            }
+            bool startOver = false; // we start over the algorithm if we find a pair that we can mark
+            for (auto c:alphabet) {
+
+                // check if the pair exists within the table
+                if (checkAccesible.count({pair.first.second->transition[c], pair.first.first->transition[c]})) {
+
+                    // check if the pair is marked
+                    if (checkAccesible[{pair.first.second->transition[c], pair.first.first->transition[c]}]) {
+
+                        //mark the pair
+                        checkAccesible[{pair.first.second->transition[c], pair.first.first->transition[c]}] = true;
+                        startOver = true;
+                        break;
+                    }
+                }
+                    // same for reversed order
+                else if (checkAccesible.count({pair.first.first->transition[c], pair.first.second->transition[c]})) {
+
+                    // check if the pair is marked
+                    if (checkAccesible[{pair.first.first->transition[c], pair.first.second->transition[c]}]) {
+
+                        //mark the pair
+                        checkAccesible[{pair.first.first->transition[c], pair.first.second->transition[c]}] = true;
+                        startOver = true;
+                        break;
+                    }
+                }
+            }
+            pos++;
+            if (startOver) break;
+        }
+        if (pos == checkAccesible.size()) break;
+    }
+    if (verbose) {
+        for (auto &pair: checkAccesible) {
+            std::cout << "Pair: " << pair.first.first->name  << pair.first.second->name << ": " << pair.second << std::endl;
+        }
+    }
+    // check if the start states are equivalent
+    if (checkAccesible.count({startState, dfa.getStartState()}))  return checkAccesible[{startState, dfa.getStartState()}];
+    else if (checkAccesible.count({dfa.getStartState(), startState}))  return checkAccesible[{dfa.getStartState(), startState}];
+    else {
+        std::cerr << "couldnt find a pair with both startstates";
+        return false;
+    }
+}
+
 DFA::DFA(std::string filename) {
     std::ifstream configDoc(filename, std::ifstream::binary);
     Json::Value root;
@@ -249,4 +370,52 @@ DFA::DFA(std::string filename) {
         }
     }
     properlyInitialized = true;
+}
+
+const std::vector<DFA::State *> &DFA::getStates() const {
+    return states;
+}
+
+DFA::State *DFA::getStartState() const {
+    return startState;
+}
+
+const std::vector<DFA::State *> &DFA::getEndStates() const {
+    return endStates;
+}
+
+bool DFA::isProperlyInitialized() const {
+    return properlyInitialized;
+}
+
+void DFA::setProperlyInitialized(bool properlyInitialized) {
+    DFA::properlyInitialized = properlyInitialized;
+}
+
+const std::vector<char> &DFA::getAlphabet() const {
+    return alphabet;
+}
+
+void DFA::setAlphabet(const std::vector<char> &alphabet) {
+    DFA::alphabet = alphabet;
+}
+
+void DFA::setStates(const std::vector<DFA::State *> &states) {
+    DFA::states = states;
+}
+
+void DFA::setStartState(DFA::State *startState) {
+    DFA::startState = startState;
+}
+
+void DFA::setEndStates(const std::vector<DFA::State *> &endStates) {
+    DFA::endStates = endStates;
+}
+
+void DFA::addState(DFA::State *state) {
+    states.emplace_back(state);
+}
+
+void DFA::addEndState(DFA::State *state) {
+    endStates.emplace_back(state);
 }
