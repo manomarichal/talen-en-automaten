@@ -5,5 +5,5 @@ digraph {
   320->320[label="c"];
   320->1[label="g"];
   head [style=invis]
-   head->320
+  head->320
 }

@@ -46,7 +46,7 @@ void DFA::convertToDot(std::string filename) {
     }
 
     // start state
-    s << "  " << "head [style=invis]\n   head->" << startState->name << std::endl;
+    s << "  " << "head [style=invis]\n  head->" << startState->name << std::endl;
     // end states
 
     outputFile << "digraph {\n" << s.str() << "}";

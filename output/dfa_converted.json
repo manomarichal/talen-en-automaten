@@ -8,66 +8,66 @@
 	[
 		{
 			"accepting" : false,
-			"name" : "{0}",
+			"name" : "\"{0}\"",
 			"starting" : true
 		},
 		{
 			"accepting" : true,
-			"name" : "{12}",
+			"name" : "\"{1,2}\"",
 			"starting" : false
 		},
 		{
 			"accepting" : false,
-			"name" : "dead",
+			"name" : "\"{}\"",
 			"starting" : false
 		},
 		{
 			"accepting" : true,
-			"name" : "{312}",
+			"name" : "\"{3,1,2}\"",
 			"starting" : false
 		}
 	],
 	"transitions" : 
 	[
 		{
-			"from" : "{0}",
+			"from" : "\"{0}\"",
 			"input" : "a",
-			"to" : "{12}"
+			"to" : "\"{1,2}\""
 		},
 		{
-			"from" : "{0}",
+			"from" : "\"{0}\"",
 			"input" : "v",
-			"to" : "dead"
+			"to" : "\"{}\""
 		},
 		{
-			"from" : "{12}",
+			"from" : "\"{1,2}\"",
 			"input" : "a",
-			"to" : "dead"
+			"to" : "\"{}\""
 		},
 		{
-			"from" : "{12}",
+			"from" : "\"{1,2}\"",
 			"input" : "v",
-			"to" : "{312}"
+			"to" : "\"{3,1,2}\""
 		},
 		{
-			"from" : "dead",
+			"from" : "\"{}\"",
 			"input" : "a",
-			"to" : "dead"
+			"to" : "\"{}\""
 		},
 		{
-			"from" : "dead",
+			"from" : "\"{}\"",
 			"input" : "v",
-			"to" : "dead"
+			"to" : "\"{}\""
 		},
 		{
-			"from" : "{312}",
+			"from" : "\"{3,1,2}\"",
 			"input" : "a",
-			"to" : "dead"
+			"to" : "\"{}\""
 		},
 		{
-			"from" : "{312}",
+			"from" : "\"{3,1,2}\"",
 			"input" : "v",
-			"to" : "{312}"
+			"to" : "\"{3,1,2}\""
 		}
 	],
 	"type" : "DFA"

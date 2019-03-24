@@ -1,14 +1,14 @@
 digraph {
-  {12}[peripheries=2]
-  {312}[peripheries=2]
-  {0}->{12}[label="a"];
-  {0}->dead[label="v"];
-  {12}->dead[label="a"];
-  {12}->{312}[label="v"];
-  dead->dead[label="a"];
-  dead->dead[label="v"];
-  {312}->dead[label="a"];
-  {312}->{312}[label="v"];
+  "{1,2}"[peripheries=2]
+  "{3,1,2}"[peripheries=2]
+  "{0}"->"{1,2}"[label="a"];
+  "{0}"->"{}"[label="v"];
+  "{1,2}"->"{}"[label="a"];
+  "{1,2}"->"{3,1,2}"[label="v"];
+  "{}"->"{}"[label="a"];
+  "{}"->"{}"[label="v"];
+  "{3,1,2}"->"{}"[label="a"];
+  "{3,1,2}"->"{3,1,2}"[label="v"];
   head [style=invis]
-   head->{0}
+  head->"{0}"
 }
