@@ -8,66 +8,66 @@
 	[
 		{
 			"accepting" : false,
-			"name" : "\"{0}\"",
+			"name" : "{0}",
 			"starting" : true
 		},
 		{
 			"accepting" : true,
-			"name" : "\"{1,2}\"",
+			"name" : "{1,2}",
 			"starting" : false
 		},
 		{
 			"accepting" : false,
-			"name" : "\"{}\"",
+			"name" : "{}",
 			"starting" : false
 		},
 		{
 			"accepting" : true,
-			"name" : "\"{3,1,2}\"",
+			"name" : "{3,1,2}",
 			"starting" : false
 		}
 	],
 	"transitions" : 
 	[
 		{
-			"from" : "\"{0}\"",
+			"from" : "{0}",
 			"input" : "a",
-			"to" : "\"{1,2}\""
+			"to" : "{1,2}"
 		},
 		{
-			"from" : "\"{0}\"",
+			"from" : "{0}",
 			"input" : "v",
-			"to" : "\"{}\""
+			"to" : "{}"
 		},
 		{
-			"from" : "\"{1,2}\"",
+			"from" : "{1,2}",
 			"input" : "a",
-			"to" : "\"{}\""
+			"to" : "{}"
 		},
 		{
-			"from" : "\"{1,2}\"",
+			"from" : "{1,2}",
 			"input" : "v",
-			"to" : "\"{3,1,2}\""
+			"to" : "{3,1,2}"
 		},
 		{
-			"from" : "\"{}\"",
+			"from" : "{}",
 			"input" : "a",
-			"to" : "\"{}\""
+			"to" : "{}"
 		},
 		{
-			"from" : "\"{}\"",
+			"from" : "{}",
 			"input" : "v",
-			"to" : "\"{}\""
+			"to" : "{}"
 		},
 		{
-			"from" : "\"{3,1,2}\"",
+			"from" : "{3,1,2}",
 			"input" : "a",
-			"to" : "\"{}\""
+			"to" : "{}"
 		},
 		{
-			"from" : "\"{3,1,2}\"",
+			"from" : "{3,1,2}",
 			"input" : "v",
-			"to" : "\"{3,1,2}\""
+			"to" : "{3,1,2}"
 		}
 	],
 	"type" : "DFA"

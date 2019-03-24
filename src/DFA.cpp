@@ -35,18 +35,23 @@ void DFA::convertToDot(std::string filename) {
     std::ofstream outputFile("../output/" + filename);
     std::stringstream s;
     // states
+    s << "nodesep=1;\n";
+    s << "overlap=false;\n";
+
+
+
     for (auto state:endStates) {
-        s << "  " << state->name << "[peripheries=2]" << std::endl;
+        s << "  " << "\"" + state->name + "\""  << "[peripheries=2]" << std::endl;
     }
     // edges
     for (auto state:states) {
         for (auto symbol:state->transition) {
-            s << "  " << state->name << "->" << symbol.second->name<< "[label=\"" << symbol.first << "\"];" << std::endl;
+            s << "  " << "\"" + state->name + "\""  << "->" << "\"" + symbol.second->name + "\"" <<  "[label=\"" << symbol.first << "\"];" << std::endl;
         }
     }
 
     // start state
-    s << "  " << "head [style=invis]\n  head->" << startState->name << std::endl;
+    s << "  " << "head [style=invis]\n  head->" << "\"" + startState->name + "\"" << std::endl;
     // end states
 
     outputFile << "digraph {\n" << s.str() << "}";
@@ -212,11 +217,13 @@ void DFA::minimizeDfa() {
     states.clear();
     endStates.clear();
     for (const auto &eqClass:eqClasses) {
-        std::string newName;
+        std::string newName = "{";
         // create new name
         for (auto &state:eqClass) {
             newName += state->name;
+            if (state->name != eqClass.back()->name) newName += ",";
         }
+        newName += "}";
         State* newState = new State(newName);
         // check if it is a final state or start state
         for (auto &state:eqClass) {

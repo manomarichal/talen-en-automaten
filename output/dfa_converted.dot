@@ -1,4 +1,6 @@
 digraph {
+nodesep=1;
+overlap=false;
   "{1,2}"[peripheries=2]
   "{3,1,2}"[peripheries=2]
   "{0}"->"{1,2}"[label="a"];

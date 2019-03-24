@@ -89,7 +89,7 @@ void NFA::sscHelper(DFA* d, SubState crState) {
 
             if (!check) {
                 // create dead state
-                DFA::State* tempDfaState = new DFA::State("\"{}\"");
+                DFA::State* tempDfaState = new DFA::State("{}");
                 d->addState(tempDfaState);
                 temp.dfastate = tempDfaState;
                 tempDfaState->final = false;
@@ -115,14 +115,14 @@ void NFA::sscHelper(DFA* d, SubState crState) {
         if (exists) continue;
 
         // create a new dfa state for the substate
-        std::string newName = "\"{";
+        std::string newName = "{";
         bool final = false;
         for (auto state:temp.consistsof) {
             newName += state->name;
             if (state->name != temp.consistsof.back()->name) newName += ",";
             if (state->final) final = true;
         }
-        newName += "}\"";
+        newName += "}";
         DFA::State* tempDfaState = new DFA::State(newName);
 
         d->addState(tempDfaState);
@@ -148,7 +148,7 @@ DFA* NFA::convertToDfa(std::string filename) {
     SubState tempState;
     tempState.consistsof.emplace_back(startState[0]);
     // make a dfa state for the new startstate
-    std::string newName = "\"{" + startState[0]->name + "}\"";
+    std::string newName = "{" + startState[0]->name + "}";
     DFA::State* tempDfaState = new DFA::State(newName);
     d->addState(tempDfaState);
     tempState.dfastate = tempDfaState;

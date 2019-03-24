@@ -8,36 +8,36 @@
 	[
 		{
 			"accepting" : true,
-			"name" : "1",
+			"name" : "{1}",
 			"starting" : false
 		},
 		{
 			"accepting" : false,
-			"name" : "320",
+			"name" : "{3,2,0}",
 			"starting" : true
 		}
 	],
 	"transitions" : 
 	[
 		{
-			"from" : "1",
+			"from" : "{1}",
 			"input" : "c",
-			"to" : "320"
+			"to" : "{3,2,0}"
 		},
 		{
-			"from" : "1",
+			"from" : "{1}",
 			"input" : "g",
-			"to" : "320"
+			"to" : "{3,2,0}"
 		},
 		{
-			"from" : "320",
+			"from" : "{3,2,0}",
 			"input" : "c",
-			"to" : "320"
+			"to" : "{3,2,0}"
 		},
 		{
-			"from" : "320",
+			"from" : "{3,2,0}",
 			"input" : "g",
-			"to" : "1"
+			"to" : "{1}"
 		}
 	],
 	"type" : "DFA"
