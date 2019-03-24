@@ -59,19 +59,23 @@ void NFA::sscHelper(DFA* d, SubState crState) {
     for (char c:d->getAlphabet()) {
 
         SubState temp;
-
+        if (crState.consistsof.size() == 3 and c == 'a') {
+            std::cout << "hello";
+        }
         // for every state that the current state consists of
         for (auto &state:crState.consistsof) {
 
             // add all states to where the states of the subset state go to to the new substate
             for (auto &transState:state->transition[c]) {
 
-                // check if the new subset doesnt contain the element
+                // check if the new subset doesnt already contain the element
                 if (temp.findState(transState)) continue;
                 temp.consistsof.emplace_back(transState);
 
             }
         }
+
+        // check if the state is a dead state
         if (temp.consistsof.empty()) {
 
             // check if the dead state already exists
@@ -89,6 +93,8 @@ void NFA::sscHelper(DFA* d, SubState crState) {
                 d->addState(tempDfaState);
                 temp.dfastate = tempDfaState;
                 tempDfaState->final = false;
+                subStates.emplace_back(temp);
+
 
                 // create transitions for dead state
                 for (char ca:d->getAlphabet()) {
@@ -99,15 +105,16 @@ void NFA::sscHelper(DFA* d, SubState crState) {
 
         }
         // check if no new state exists already for the transition, if not add the new substate
+        bool exists=false;
         for (auto &state:subStates) {
             if (temp == state) {
                 // make the transition to that state
                 crState.dfastate->transition[c] = state.dfastate;
-                return;
+                exists=true;
             }
         }
+        if (exists) continue;
 
-        subStates.emplace_back(temp);
         // create a new dfa state for the substate
         std::string newName = "{";
         bool final = false;
@@ -117,6 +124,7 @@ void NFA::sscHelper(DFA* d, SubState crState) {
         }
         newName += "}";
         DFA::State* tempDfaState = new DFA::State(newName);
+
         d->addState(tempDfaState);
         temp.dfastate = tempDfaState;
         tempDfaState->final = final;
@@ -124,6 +132,7 @@ void NFA::sscHelper(DFA* d, SubState crState) {
         // make the transition from the current state to this one
         crState.dfastate->transition[c] = tempDfaState;
 
+        subStates.emplace_back(temp);
         sscHelper(d, temp);
 
     }
@@ -138,13 +147,13 @@ DFA* NFA::convertToDfa(std::string filename) {
     // start state
     SubState tempState;
     tempState.consistsof.emplace_back(startState[0]);
-    subStates.emplace_back(tempState);
     // make a dfa state for the new startstate
     std::string newName = "{" + startState[0]->name + "}";
     DFA::State* tempDfaState = new DFA::State(newName);
     d->addState(tempDfaState);
     tempState.dfastate = tempDfaState;
     tempDfaState->final = startState[0]->final;
+    subStates.emplace_back(tempState);
 
     // do subset construction + lazy evaluation
     sscHelper(d, tempState);

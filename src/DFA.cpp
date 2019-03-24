@@ -139,6 +139,75 @@ void DFA::minimizeDfa() {
         eqClasses.emplace_back(eqClass);
     }
 
+    // create html table
+    std::ofstream outputFile("../output/table-min.html");
+    std::stringstream output;
+
+    output <<
+           "<html>\n"
+           "<head>\n"
+           "<style>\n"
+           "table, th, td {\n"
+           "       border: 1px solid black;\n"
+           "       font-family:\"Courier New\", Courier, monospace;\n"
+           "       font-size:150%\n"
+           "}\n"
+           "table {\n"
+           "       border-collapse: collapse;\n"
+           "}\n"
+           "td,th {\n"
+           "       height: 50px;\n"
+           "       width: 50;\n"
+           "       text-align: center;\n"
+           "}\n"
+           "tr:nth-child(even) {background-color: #f2f2f2;}\n"
+           "th {\n"
+           "       background-color: #4CAF50;\n"
+           "       color: white;\n"
+           "}\n"
+           "</style>\n"
+           "</head>\n"
+           "<body>\n"
+           "<table>\n";
+
+    for (int column=1;column<states.size();column++) {
+        output << "  <tr>\n"
+                  "     <th>" + states[column]->name + "</th>\n";
+
+        for (auto eqClass:eqClasses) {
+            if (std::find(eqClass.begin(), eqClass.end(), states[column]) != eqClass.end()) {
+
+                // we found the equivalence class
+                for (int row=0; row<column;row++) {
+
+                    // look for the state in the equivalence class
+                    bool found = false;
+
+                    for (auto state:eqClass) {
+                        if (state->name == states[row]->name) found = true;
+                    }
+
+                    if (!found) {
+                        output << "     <td>X</td>\n";
+                    }
+                    else output << "     <td></td>\n";
+                }
+                output << "  </tr>\n";
+            }
+        }
+    }
+    output << "  <tr>\n";
+    output << "     <th></th>\n";
+    for (int column=0;column<states.size()-1;column++) {
+        output << "     <th>" + states[column]->name + "</th>\n";
+    }
+    output << "  </tr>\n";
+
+
+    output << "</body>\n" << "</html>";
+    outputFile << output.str();
+    outputFile.close();
+
     // create new states and delete old ones (wordt nog niet gedaan)
     states.clear();
     endStates.clear();
@@ -185,7 +254,7 @@ void DFA::convertToJson(std::string filename) {
     std::ofstream outputFile("../output/" + filename);
     Json::Value output;
 
-    output["type"] = "dfa";
+    output["type"] = "DFA";
 
     // alphabet
     Json::Value tempAlphabet(Json::arrayValue);
@@ -223,7 +292,7 @@ void DFA::convertToJson(std::string filename) {
     outputFile.close();
 }
 
-bool DFA::isEquivalentTo(const DFA &dfa, bool verbose) {
+bool DFA::isEquivalentTo(const DFA &dfa) {
 
     std::vector<State*> unie;
     for (State* state:states) unie.emplace_back(state);
@@ -286,18 +355,116 @@ bool DFA::isEquivalentTo(const DFA &dfa, bool verbose) {
         }
         if (pos == checkAccesible.size()) break;
     }
-    if (verbose) {
-        for (auto &pair: checkAccesible) {
-            std::cout << "Pair: " << pair.first.first->name  << pair.first.second->name << ": " << pair.second << std::endl;
+
+    std::vector<std::vector<State*>> eqClasses;
+    // rekening houden met memloss (oude states deleten)
+    // replace each state with it's equivalence class
+    for (auto &state:unie) {
+
+        // first we check if the state isnt already in an equivalence class
+        if (checkInEqClass(eqClasses, state)) continue;
+
+        // make a new equivalence class with the state in
+        std::vector<State*> eqClass = {state};
+
+        // check if any other states belong to the equivalence class
+        for (const auto &pair:checkAccesible) {
+
+            if (pair.second) continue;
+            if (pair.first.first == state) {
+                eqClass.emplace_back(pair.first.second);
+            }
+
+            else if (pair.first.second == state) {
+                eqClass.emplace_back(pair.first.first);
+            }
         }
+        eqClasses.emplace_back(eqClass);
     }
-    // check if the start states are equivalent
-    if (checkAccesible.count({startState, dfa.getStartState()}))  return checkAccesible[{startState, dfa.getStartState()}];
-    else if (checkAccesible.count({dfa.getStartState(), startState}))  return checkAccesible[{dfa.getStartState(), startState}];
+
+    // create html table
+    bool result = true;
+    if (checkAccesible.count({startState, dfa.getStartState()})) {
+        if (checkAccesible[{startState, dfa.getStartState()}]) result = false;
+    }
+    else if (checkAccesible.count({dfa.getStartState(), startState}))  {
+        if (checkAccesible[{dfa.getStartState(), startState}]) result = false;
+    }
     else {
         std::cerr << "couldnt find a pair with both startstates";
         return false;
     }
+
+    std::ofstream outputFile("../output/table-eq.html");
+    std::stringstream output;
+
+    output <<
+           "<html>\n"
+           "<head>\n"
+           "<style>\n"
+           "table, th, td {\n"
+           "       border: 1px solid black;\n"
+           "       font-family:\"Courier New\", Courier, monospace;\n"
+           "       font-size:150%\n"
+           "}\n"
+           "table {\n"
+           "       border-collapse: collapse;\n"
+           "}\n"
+           "td,th {\n"
+           "       height: 50px;\n"
+           "       width: 50;\n"
+           "       text-align: center;\n"
+           "}\n"
+           "tr:nth-child(even) {background-color: #f2f2f2;}\n"
+           "th {\n"
+           "       background-color: #4CAF50;\n"
+           "       color: white;\n"
+           "}\n"
+           "</style>\n"
+           "</head>\n"
+           "<body>\n";
+    if (result) output << "     Equivalent = true";
+    else output << "     Equivalent = false";
+
+    output << "<table>\n";
+    for (int column=1;column<unie.size();column++) {
+        output << "  <tr>\n"
+                  "     <th>" + unie[column]->name + "</th>\n";
+
+        for (auto eqClass:eqClasses) {
+            if (std::find(eqClass.begin(), eqClass.end(), unie[column]) != eqClass.end()) {
+
+                // we found the equivalence class
+                for (int row=0; row<column;row++) {
+
+                    // look for the state in the equivalence class
+                    bool found = false;
+
+                    for (auto state:eqClass) {
+                        if (state->name == unie[row]->name) found = true;
+                    }
+                    if (!found) {
+                        output << "     <td>X</td>\n";
+                    }
+                    else output << "     <td></td>\n";
+                }
+                output << "  </tr>\n";
+            }
+        }
+    }
+    output << "  <tr>\n";
+    output << "     <th></th>\n";
+    for (int column=0;column<unie.size()-1;column++) {
+        output << "     <th>" + unie[column]->name + "</th>\n";
+    }
+    output << "  </tr>\n";
+
+
+    output << "</body>\n" << "</html>";
+    outputFile << output.str();
+    outputFile.close();
+
+    return result;
 }
 
 DFA::DFA(std::string filename) {

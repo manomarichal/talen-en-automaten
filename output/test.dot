@@ -3,12 +3,12 @@ digraph {
   {312}[peripheries=2]
   {0}->{12}[label="a"];
   {0}->dead[label="v"];
-  {12}->dead[label="a"];
+  {12}->{}[label="a"];
   {12}->{312}[label="v"];
   dead->dead[label="a"];
   dead->dead[label="v"];
+  {}->dead[label="a"];
   {312}->dead[label="a"];
-  {312}->{312}[label="v"];
   head [style=invis]
    head->{0}
 }

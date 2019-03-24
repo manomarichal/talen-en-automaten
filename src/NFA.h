@@ -77,8 +77,6 @@ private:
 
     void sscHelper(DFA* d, SubState crState);
 
-
-
 };
 
 

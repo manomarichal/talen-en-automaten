@@ -1,6 +1,0 @@
-digraph {
-  1[peripheries=2]
-  320->1[label="g"];
-  head [style=invis]
-   head->320
-}

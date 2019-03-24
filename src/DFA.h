@@ -41,8 +41,9 @@ public:
 
     void convertToJson(std::string filename);
 
-    bool isEquivalentTo(const DFA &dfa, bool verbose);
+    bool isEquivalentTo(const DFA &dfa);
 
+    // getters and setters
     const std::vector<State *> &getStates() const;
 
     const std::vector<char> &getAlphabet() const;

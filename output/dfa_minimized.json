@@ -40,5 +40,5 @@
 			"to" : "1"
 		}
 	],
-	"type" : "dfa"
+	"type" : "DFA"
 }
