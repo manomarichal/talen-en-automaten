@@ -32,10 +32,10 @@ bool DFA::inputString(std::string input) {
 
 void DFA::convertToDot(std::string filename) {
     if (!properlyInitialized) return;
-    std::ofstream outputFile("../output/" + filename);
+    std::ofstream outputFile(filename);
     std::stringstream s;
     // states
-    s << "nodesep=1;\n";
+    s << "nodesep=0.5;\n";
     s << "overlap=false;\n";
 
 
@@ -58,7 +58,7 @@ void DFA::convertToDot(std::string filename) {
     outputFile.close();
 }
 
-void DFA::minimizeDfa() {
+void DFA::minimizeDfa(std::string outputname) {
     if (!properlyInitialized) return;
     // deze map stelt de tabel voor met de paren, de bool geeft aan of het wel of niet onderscheidbaar is
     std::map<std::pair<State*, State*>, bool> checkAccesible;
@@ -145,7 +145,7 @@ void DFA::minimizeDfa() {
     }
 
     // create html table
-    std::ofstream outputFile("../output/table-min.html");
+    std::ofstream outputFile(outputname);
     std::stringstream output;
 
     output <<
@@ -258,7 +258,7 @@ void DFA::minimizeDfa() {
 
 void DFA::convertToJson(std::string filename) {
     if (!properlyInitialized) return;
-    std::ofstream outputFile("../output/" + filename);
+    std::ofstream outputFile(filename);
     Json::Value output;
 
     output["type"] = "DFA";
@@ -299,7 +299,7 @@ void DFA::convertToJson(std::string filename) {
     outputFile.close();
 }
 
-bool DFA::isEquivalentTo(const DFA &dfa) {
+bool DFA::isEquivalentTo(const DFA &dfa, std::string outputname) {
 
     std::vector<State*> unie;
     for (State* state:states) unie.emplace_back(state);
@@ -402,7 +402,7 @@ bool DFA::isEquivalentTo(const DFA &dfa) {
         return false;
     }
 
-    std::ofstream outputFile("../output/table-eq.html");
+    std::ofstream outputFile(outputname);
     std::stringstream output;
 
     output <<

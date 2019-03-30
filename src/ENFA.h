@@ -1,9 +1,9 @@
 //
-// Created by manom on 2/03/2019.
+// Created by mano on 30.03.19.
 //
 
-#ifndef DFADOT_NFA_H
-#define DFADOT_NFA_H
+#ifndef DFADOT_ENFA_H
+#define DFADOT_ENFA_H
 
 #include <vector>
 #include <map>
@@ -15,9 +15,9 @@
 #include "./json.h"
 #include "DFA.h"
 
-class NFA {
-public:
 
+class ENFA {
+public:
     struct State {
         std::map<char, std::vector<State*>> transition;
         std::string name;
@@ -29,23 +29,6 @@ public:
         }
     };
 
-    NFA(std::string filename);
-
-    bool inputString(std::string s);
-
-    void convertToDot(std::string filename);
-
-    DFA* convertToDfa();
-
-private:
-
-    std::vector<char> alphabet;
-    std::vector<State*> states;
-    std::vector<State*> startState;
-    std::vector<State*> endStates;
-    std::vector<State*> currentState;
-    void transition(char c);
-    bool properlyInitialized = false;
 
     // helpers used by subsetconstruction
     struct SubState {
@@ -71,7 +54,36 @@ private:
             }
             return check;
         }
+
+        void eclose(char epsilon) {
+            for (auto state:this->consistsof) {
+                for (auto trans:state->transition[epsilon]) {
+                    if (this->findState(trans)) continue;
+                    this->consistsof.emplace_back(trans);
+                }
+            }
+        }
     };
+
+    ENFA(std::string filename);
+
+    bool inputString(std::string s);
+
+    void convertToDot(std::string filename);
+
+    DFA* convertToDfa();
+
+private:
+
+    char eps;
+
+    std::vector<char> alphabet;
+    std::vector<State*> states;
+    std::vector<State*> startState;
+    std::vector<State*> endStates;
+    std::vector<State*> currentState;
+    void transition(char c);
+    bool properlyInitialized = false;
 
     std::vector<SubState> subStates;
 
@@ -80,4 +92,4 @@ private:
 };
 
 
-#endif //DFADOT_NFA_H
+#endif //DFADOT_ENFA_H

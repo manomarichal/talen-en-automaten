@@ -1,10 +1,10 @@
 //
-// Created by manom on 2/03/2019.
+// Created by mano on 30.03.19.
 //
 
-#include "./NFA.h"
+#include "ENFA.h"
 
-void NFA::transition(char c) {
+void ENFA::transition(char c) {
     std::vector<State*> next;
     for (auto s: currentState) {
         for (auto n: s->transition[c]) {
@@ -14,7 +14,7 @@ void NFA::transition(char c) {
     currentState = next;
 }
 
-bool NFA::inputString(std::string input) {
+bool ENFA::inputString(std::string input) {
     if (!properlyInitialized) return false;
     currentState = {startState};
     for (char c: input) {
@@ -30,7 +30,7 @@ bool NFA::inputString(std::string input) {
     return false;
 }
 
-void NFA::convertToDot(std::string filename) {
+void ENFA::convertToDot(std::string filename) {
     if (!properlyInitialized) return;
     std::ofstream outputFile(filename);
     std::stringstream s;
@@ -42,7 +42,7 @@ void NFA::convertToDot(std::string filename) {
     for (auto state:states) {
         for (auto symbol:state->transition) {
             for (auto edge:symbol.second)
-            s << "  " << state->name << "->" << edge->name << "[label=\"" << symbol.first << "\"];" << std::endl;
+                s << "  " << state->name << "->" << edge->name << "[label=\"" << symbol.first << "\"];" << std::endl;
         }
     }
 
@@ -54,13 +54,19 @@ void NFA::convertToDot(std::string filename) {
     outputFile.close();
 }
 
-void NFA::sscHelper(DFA* d, SubState crState) {
+void ENFA::sscHelper(DFA* d, SubState crState) {
+
     // add transitions
     for (char c:d->getAlphabet()) {
 
+        if (c == eps) continue;
+
         SubState temp;
 
-        // for every state that the current state consists of
+        // first eclose
+        crState.eclose(eps);
+
+        // for every state that the eclose of the current state consists of
         for (auto &state:crState.consistsof) {
 
             // add all states to where the states of the subset state go to to the new substate
@@ -72,6 +78,9 @@ void NFA::sscHelper(DFA* d, SubState crState) {
 
             }
         }
+
+        // second eclose
+        temp.eclose(eps);
 
         // check if the state is a dead state
         if (temp.consistsof.empty()) {
@@ -136,24 +145,36 @@ void NFA::sscHelper(DFA* d, SubState crState) {
     }
 }
 
-DFA* NFA::convertToDfa() {
 
-   DFA* d = new DFA;
-   d->setAlphabet(alphabet);
-   std::vector<DFA::State*> dfaStates;
+
+DFA* ENFA::convertToDfa() {
+
+    DFA* d = new DFA;
+    d->setAlphabet(alphabet);
+    std::vector<DFA::State*> dfaStates;
 
     // start state
     SubState tempState;
     tempState.consistsof.emplace_back(startState[0]);
+    tempState.eclose(eps);
+
     // make a dfa state for the new startstate
-    std::string newName = "{" + startState[0]->name + "}";
+    std::string newName = "{";
+    bool final = false;
+    for (auto state:tempState.consistsof) {
+        newName += state->name;
+        if (state->name != tempState.consistsof.back()->name) newName += ",";
+        if (state->final) final = true;
+    }
+    newName += "}";
+
     DFA::State* tempDfaState = new DFA::State(newName);
     d->addState(tempDfaState);
     tempState.dfastate = tempDfaState;
-    tempDfaState->final = startState[0]->final;
+    tempDfaState->final = final;
     subStates.emplace_back(tempState);
 
-    // do subset construction + lazy evaluation
+    // do modified subset construction + lazy evaluation
     sscHelper(d, tempState);
 
     // set start and final states for the dfa
@@ -166,13 +187,13 @@ DFA* NFA::convertToDfa() {
     return d;
 }
 
-NFA::NFA(std::string filename) {
+ENFA::ENFA(std::string filename) {
     std::ifstream configDoc(filename, std::ifstream::binary);
     Json::Value root;
     Json::Reader reader;
     reader.parse(configDoc, root, false);
     std::string type = root["type"].asString();
-    if (type != "NFA") {
+    if (type != "ENFA") {
         std::cerr <<  "failed to construct nfa: type is not NFA" << std::endl;
         return;
     }
@@ -186,6 +207,10 @@ NFA::NFA(std::string filename) {
         }
         alphabet.push_back(alphabetJson[index].asString()[0]);
     }
+    // read epsilon in
+    std::string temp = root["eps"].asString();
+    eps = temp[0];
+    alphabet.emplace_back(eps);
 
     // read states in
     const Json::Value &statesJson = root["states"];
@@ -225,9 +250,9 @@ NFA::NFA(std::string filename) {
                     std::cerr << "input symbols can only be characters" << std::endl;
                     return;
                 }
-                // check if the alphabet contains the character
+                // check if the alphabet contains the character or if it is epsilon
                 if (std::find(alphabet.begin(), alphabet.end(), transitionsJson[index]["input"].asString()[0]) == alphabet.end()) {
-                    std::cerr << "input symbols not found in alphabet" << std::endl;
+                    std::cerr << "input symbol not found in alphabet: " << transitionsJson[index]["input"].asString()[0] << std::endl;
                     return;
                 }
                 for (auto s: states) {

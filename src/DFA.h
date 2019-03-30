@@ -37,11 +37,11 @@ public:
 
     void convertToDot(std::string filename);
 
-    void minimizeDfa();
+    void minimizeDfa(std::string outputname);
 
     void convertToJson(std::string filename);
 
-    bool isEquivalentTo(const DFA &dfa);
+    bool isEquivalentTo(const DFA &dfa, std::string outputname);
 
     // getters and setters
     const std::vector<State *> &getStates() const;
